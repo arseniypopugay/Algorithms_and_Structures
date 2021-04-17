@@ -1,10 +1,8 @@
 #include <iostream>
 
 int main() {
-    int n;
-    int p;
-    long cur_sum = 0;
-    long best_sum = 0;
+    int n, p;
+    long cur_sum = 0, best_sum = 0;
 
     std::cin >> n;
 
