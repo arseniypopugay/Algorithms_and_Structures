@@ -15,7 +15,7 @@ int main() {
     int numerator = 1;
     std::stringstream ss;
 
-    while (std::cin.get(cur_char)) {
+    while (std::cin >> cur_char) {
         is_capital = cur_char - 'Z' <= 0;
 
 
