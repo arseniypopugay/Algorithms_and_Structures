@@ -18,11 +18,13 @@ int main(){
         weights['a' + i] = weight;
 
         letter_counter = std::count(input_string.begin(), input_string.end(), 'a'+i);
+        if (letter_counter == 0) continue;
         if (letter_counter >= 2) {
-            reminder += (('a'+i)*(letter_counter-2));
+            if (letter_counter > 2)
+                reminder += ('a'+i)*(letter_counter-2);
             weight_string += ('a'+i);
         }
-        else reminder += (('a'+i)*(letter_counter));
+        else reminder += ('a'+i)*(letter_counter);
     }
 
     std::sort(weight_string.rbegin(), weight_string.rend(), [](const auto& x, const auto& y)->bool {
