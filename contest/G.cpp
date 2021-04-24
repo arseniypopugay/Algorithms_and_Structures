@@ -21,10 +21,10 @@ int main(){
         if (letter_counter == 0) continue;
         if (letter_counter >= 2) {
             if (letter_counter > 2)
-                reminder += ('a'+i)*(letter_counter-2);
-            weight_string += ('a'+i);
+                reminder += std::string(letter_counter-2, 'a'+i);//('a'+i)*(letter_counter-2);
+            weight_string += 'a'+i;
         }
-        else reminder += ('a'+i)*(letter_counter);
+        else reminder += std::string(letter_counter, 'a'+i);
     }
 
     std::sort(weight_string.rbegin(), weight_string.rend(), [](const auto& x, const auto& y)->bool {
