@@ -5,8 +5,8 @@
 struct exchange_point {
     int A;
     int B;
-    double RAB;
-    double CAB;
+    double rab;
+    double cab;
 };
 
 int main() {
@@ -31,13 +31,13 @@ int main() {
     //Алгоритм Форда - Беллмана
     for (int i = 0; i < n - 1; ++i) {
         for (auto &point : points) {
-            if (values[point.B] < (values[point.A] - point.CAB) * point.RAB)
-                values[point.B] = (values[point.A] - point.CAB) * point.RAB;
+            if (values[point.B] < (values[point.A] - point.CAB) * point.rab)
+                values[point.B] = (values[point.A] - point.CAB) * point.rab;
         }
     }
 
     for (auto &point : points) {
-        if ((values[point.A] - point.CAB) * point.RAB > values[point.B]) {
+        if ((values[point.A] - point.cab) * point.rab > values[point.B]) {
             std::cout << "YES";
             return 0;
         }
