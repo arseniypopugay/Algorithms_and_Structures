@@ -1,160 +1,144 @@
-#include <iostream>
-#include <vector>
-#include <deque>
-#include <algorithm>
+#include<iostream>
+#include<vector>
+#include<map>
+#include<queue>
+#include<stack>
 
 using namespace std;
 
-struct Node;
+int weights[10];
+int I = 0;
 
-struct Link {
-    int32_t weight;
-    Node *point;
-};
-
-struct Node {
-    vector<Link> neighbours;
-    string number;
-    int32_t dist;
-    Node *prev;
-    size_t position;
-};
-
-bool operator<(const Node& a, const Node& b) {
-    return a.dist > b.dist;
-}
-
-
-vector<Node *> telegraphs;
-deque<Node*> Q;
-int transmission_cost[10] = {0};
-
-int calculate_cost(string n1, string n2) {
-    int fail_count = 0, prefix_len = 0;
-    char fail_sym1, fail_sym2;
-
-    for (int i = 0; i < n1.length(); i++) {
-        switch (fail_count) {
-            case 0:
-                if (n1[i] == n2[i])
-                    prefix_len++;
-                else {
-                    fail_count++;
-                    fail_sym1 = n1[i];
-                    fail_sym2 = n2[i];
-                }
-                break;
-            case 1:
-                if (n1[i] != n2[i]) {
-                    if (n1[i] == fail_sym2 && n2[i] == fail_sym1) {
-                        fail_count++;
-                    } else return -1;
-                }
-                break;
-            case 2:
-                if (n1[i] != n2[i])
-                    return -1;
-                break;
-            default:
-                return -1;
-
-        }
-    }
-    return transmission_cost[prefix_len];
-}
-
-void add_number(const string& number) {
-    auto node_number = new Node();
-    node_number->number = number;
-    node_number->dist = INT32_MAX/2;
-    node_number->prev = nullptr;
-    node_number->position = telegraphs.size()+1;
-
-    for (auto& node: telegraphs)
+struct node {
+    int number;
+    int next;
+    int weight;
+    node(int number, int next, int weight)
     {
-        int cost = calculate_cost(number, node->number);
-        if (cost!=-1) {
-            node_number->neighbours.push_back({cost, node});
-            node->neighbours.push_back({cost, node_number});
+        this->number = number;
+        this->weight = weight;
+        this->next = next;
+    }
+};
+vector<node> side;
+map<string, int> telegraph_position;
+vector<string> s;
+stack<int> st;
+vector<int> previ;
+vector<int> head;
+vector<int> dist;
+vector<bool> visited;
+
+void add(int i, int j, int weight) {
+    side.emplace_back(j, head[i], weight);
+    head[i] = I++;
+}
+
+int costtime(int i, int j) {
+    for (int x = 0; x < 10; ++x) {
+        if (s[i][x] != s[j][x])
+            return weights[x];
+    }
+    return 10;
+}
+
+bool dijkstra(int start, int end) {
+    queue<int> qt;
+    qt.push(start);
+    visited[start] = true;
+    dist[start] = 0;
+
+    while (!qt.empty()) {
+        int x = qt.front();
+        qt.pop();
+        visited[x] = false;
+        for (int t = head[x]; t != -1; t = side[t].next) {
+            int j = side[t].number;
+            if (dist[j] == -1 || dist[j] > dist[x] + side[t].weight) {
+
+                dist[j] = dist[x] + side[t].weight;
+                previ[j] = x;
+                if (!visited[j]) {
+                    visited[j] = true;
+                    qt.push(j);
+                }
+            }
         }
     }
 
-    telegraphs.push_back(node_number);
+    if (dist[end] == -1)
+        return false;
+    return true;
 }
 
 int main() {
     int n;
     cin >> n;
+    string a;
 
-    for (int & cost : transmission_cost)
-        cin >> cost;
+    for (int &weight : weights)
+        cin >> weight;
 
-    for (int i = 0; i < n; i++)
-    {
-        string number;
-        cin >> number;
-        add_number(number);
+    s.emplace_back(a);
+    for (int i = 0; i < n; ++i) {
+        cin >> a;
+        s.push_back(a);
+        telegraph_position[a] = i + 1;
     }
 
+    head.assign(n + 1, -1);
+    dist.assign(n + 1, -1);
+    visited.assign(n + 1, false);
+    previ.assign(n + 1, -1);
 
-//    for (auto &node: telegraphs)
-//    {
-//        cout << node->number << ": " << endl;
-//        for (auto &neigh: node->neighbours)
-//            cout << "\t" << neigh.point->number << " - " << neigh.weight << endl;
-//    }
+    map<string, int>::iterator it;
 
-    telegraphs[0]->dist = 0;
+    for (int i = 1; i <= n; ++i) {
+        s[0] = s[i];
 
-
-    for (auto&el: telegraphs)
-        Q.push_back(el);
-
-    while (!Q.empty()) {
-
-        auto it = min_element(Q.begin(), Q.end(), [](const auto& x, const auto& y)->bool {
-            return x->dist < y->dist;
-        });
-        auto v = (*it);
-
-//        cout << "Current vertex: " << v->number  << " with dist "<<  v->dist<< endl;
-        for (auto &u: v->neighbours)
-        {
-            int new_dist = v->dist + u.weight;
-            if (new_dist < u.point->dist)
-            {
-                u.point->dist = new_dist;
-                u.point->prev = v;
+        for (int l = 0; l < 10; ++l) {
+            char cur_char = s[i][l];
+            for (char c = '0'; c <= '9'; ++c) {
+                if (cur_char == c)
+                    continue;
+                s[i][l] = c;
+                if ((it = telegraph_position.find(s[i])) != telegraph_position.end()) {
+                    add(i, it->second, costtime(0, it->second));
+                }
             }
+            s[i][l] = cur_char;
         }
 
-        Q.erase(it);
+
+        for (int l = 0; l < 10; ++l)
+            for (int r = l + 1; r < 10; ++r) {
+                if (s[i][l] == s[i][r])
+                    continue;
+                swap(s[i][l], s[i][r]);
+                if ((it = telegraph_position.find(s[i])) != telegraph_position.end()) {
+                    add(i, it->second, costtime(0, it->second));
+                }
+                swap(s[i][l], s[i][r]);
+            }
     }
 
-//    for (auto &node: telegraphs)
-//        {
-//            cout << node->number << ": " << node->dist << endl;
-//        }
 
-    auto v = telegraphs.back();
-
-    if (!v->prev)
-    {
-        cout << -1;
+    if (!dijkstra(1, n)) {
+        cout << "-1";
         return 0;
     }
 
-    cout << v->dist << endl;
-
-    deque <size_t> path;
-
-    while (v->prev)
-    {
-        path.push_front(v->position);
-        v = v->prev;
+    int k = n;
+    while (k != 1) {
+        st.push(k);
+        k = previ[k];
     }
 
-    cout << path.size() +1 << endl << 1 << " ";
-    for (auto &el: path)
-        cout << el << " ";
+    cout << dist[n] << endl << (st.size() + 1) << endl << "1";
+
+    while (!st.empty()) {
+        cout << " " << st.top();
+        st.pop();
+    }
+    cout << endl;
 }
