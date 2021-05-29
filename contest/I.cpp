@@ -5,14 +5,9 @@
 
 using namespace std;
 
-vector<int> cash;
+//vector<int> cash;
 set<pair<int, int>> delete_list;
 
-int search(int num) {
-    for (int i = 0; i < cash.size(); i++)
-        if (cash[i] == num) return i;
-    return -1;
-}
 
 int main() {
     int N, K, P, t;
@@ -21,7 +16,7 @@ int main() {
     vector<int> cars;
 
     cars.reserve(P);
-    cash.reserve(K);
+//    cash.reserve(K);
     vector<deque<int>> positions(N+1);
 
     for (int i = 0; i < P; i++) {
@@ -35,34 +30,35 @@ int main() {
 
         positions[cars[i]].pop_front();
 
-        int r = search(cars[i]);
-        if (r!=-1) {
-            delete_list.erase({i, r});
+        auto it = delete_list.begin();
+        for (it; it != delete_list.end(); it++) {
+            if (it->second == cars[i])
+                break;
+        }
+        if (it!=delete_list.end()) {
+            delete_list.erase(it);
             if (positions[cars[i]].empty())
-                delete_list.insert({2*P, r});
+                delete_list.insert({2*P, cars[i]});
             else
-                delete_list.insert({positions[cars[i]].front(), r});
+                delete_list.insert({positions[cars[i]].front(), cars[i]});
             hit++;
             continue;
         }
 
-        if (cash.size() < K) {
-            cash.push_back(cars[i]);
+        if (delete_list.size() < K) {
             if (positions[cars[i]].empty())
-                delete_list.insert({2*P, cash.size()-1});
+                delete_list.insert({2*P, cars[i]});
             else
-                delete_list.insert({positions[cars[i]].front(), cash.size()-1});
+                delete_list.insert({positions[cars[i]].front(), cars[i]});
         }
 
         else {
-            auto it = delete_list.end();
-            int j = (*--it).second;
+            --it;
             delete_list.erase(it);
-            cash[j] = cars[i];
             if (positions[cars[i]].empty())
-                delete_list.insert({2*P, j});
+                delete_list.insert({2*P, cars[i]});
             else
-                delete_list.insert({positions[cars[i]].front(), j});
+                delete_list.insert({positions[cars[i]].front(), cars[i]});
         }
     }
     cout << cars.size() - hit << endl;
