@@ -28,13 +28,10 @@ int main() {
     int hit = 0;
     for (int i = 0; i < cars.size(); i++) {
 
+
+        auto it = delete_list.find({positions[cars[i]].front(), cars[i]});
         positions[cars[i]].pop_front();
 
-        auto it = delete_list.begin();
-        for (it; it != delete_list.end(); it++) {
-            if (it->second == cars[i])
-                break;
-        }
         if (it!=delete_list.end()) {
             delete_list.erase(it);
             if (positions[cars[i]].empty())
